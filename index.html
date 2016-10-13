@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>MapRoulette Challenges</title>
+  <link rel="stylesheet" type="text/css" href="bower_components/sortable/css/sortable-theme-minimal.css">
+</head>
+<body>
+  <h1>MapRoulette Challenges</h1>
+  <p>A list of all current MapRoulette Challenges!</p>
+  <div id='status'></div>
+  <table class="sortable-theme-minimal" data-sortable id='challenge-table'>
+  	<tr>
+  		<th>Challenge</th>
+  		<th>Tasks</th>
+  		<th>Available</th>
+  		<th>Complete</th>
+  	</tr>
+  </table>
+  <script src="bower_components/zepto/zepto.min.js"></script>
+  <script src="bower_components/sortable/js/sortable.min.js"></script>
+  <script type="text/javascript">
+  	var challenge_table = $('#challenge-table');
+  	var totalChallenges = 0;
+  	var challengesRetrieved = 0;
+
+  	// Render a message in the status line
+  	function renderStatus(message) {
+  		$('#status').css('color', 'black').html(message);
+  	}
+
+  	// Render an error in the status line
+  	function renderError(data, status, xhr) {
+  		$('#status').css('color', 'red').html('Data could not be loaded: ' + status);
+  	}
+
+  	// Populate a challenge row with details
+  	function renderChallenge(details){
+  		if (details.length === 1) {
+	  		var metrics = details[0]['actions'];
+	  		var rowId = '#' + details[0]['id'];
+	  		var row = $(rowId);
+	  		row.append('<td>' + 
+	  			metrics['total'] + 
+	  			'</td><td>' + 
+	  			metrics['available'] + 
+	  			'</td><td>' + 
+	  			Math.round((metrics['total'] - metrics['available']) * 100 / metrics['total']) + 
+	  			'%</td>');
+  		}
+  		challengesRetrieved++;
+  		renderStatus('Getting challenge details ' + challengesRetrieved + ' / ' + totalChallenges);
+  	}
+
+  	// Get Challenge details
+  	function getChallengeDetails(challengeId){
+  		$.ajax({
+  			url: 'http://maproulette.org/api/v2/data/challenge/' + challengeId,
+  			dataType: 'json',
+  			success: renderChallenge,
+  			error: renderError
+  		});
+  	}
+
+  	// Render the initial challenge table
+  	function renderChallengeTable(challenges){
+  		totalChallenges = challenges.length;
+  		for (var i = 0; i < totalChallenges - 1; i++) {
+  		//for (var i = 0; i < 10; i++) {
+  			var challengeId = challenges[i]['id'].toString()
+			challenge_table.append('<tr id=' + challengeId + '><td><a href="http://maproulette.org/map/' + challengeId + '">' + challenges[i]['name'] + '</a></td></tr');
+			getChallengeDetails(challengeId);
+		}
+	};
+
+	// When all is done...
+	$(document).on('ajaxStop', function(e, xhr, options) {
+		renderStatus('Done!');
+		Sortable.initTable(challenge_table);
+	});
+
+	// Get the challenge list
+	renderStatus('Loading challenges...');
+	$.ajax({
+  		url: 'http://maproulette.org/api/v2/challenges?limit=-1&page=0', 
+  		dataType: 'json',
+  		success: renderChallengeTable,
+	  	error: renderError, 
+	});
+  </script>
+</body>
+</html>

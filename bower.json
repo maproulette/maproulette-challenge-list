@@ -1,0 +1,25 @@
+{
+  "name": "maproulette-challenge-list",
+  "authors": [
+    "Martijn van Exel <m@rtijn.org>"
+  ],
+  "description": "A List of MapRoulette Challenges",
+  "main": "index.html",
+  "keywords": [
+    "maproulette",
+    "openstreetmap"
+  ],
+  "license": "MIT",
+  "homepage": "http://maproulette.org/",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "zepto": "^1.1.6",
+    "sortable": "^0.8.0"
+  }
+}
